@@ -2,7 +2,7 @@
 ##Case Study #5, GEO 511
 ##Author: Betsy McCall
 ##Date: 10/03/2020
-##Revised: 
+##Revised: 10/06/2020
 ###################################################
 library(spData)
 library(sf)
