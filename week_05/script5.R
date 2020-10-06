@@ -24,10 +24,10 @@ us_statesa <- st_transform(us_states, crs=albers)
 #filter to NY state only
 us_statesany <- us_statesa %>% filter(NAME=="New York")
 
-border_10km <- st_intersection(worldacb,us_statesac)
+border_10km <- st_intersection(worldacb,us_statesany)
 #plot 10km border of Canada in NY
-ggplot(data=us_statesany)+geom_sf()+geom_sf(data=border_10km,fill="red")
-
+map <- ggplot(data=us_statesany)+geom_sf()+geom_sf(data=border_10km,fill="red")
+print(map)
 #find area
 border_area <- st_area(border_10km)
 print(border_area)
