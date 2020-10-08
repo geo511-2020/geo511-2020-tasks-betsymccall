@@ -2,7 +2,7 @@
 ##Case Study #5, GEO 511
 ##Author: Betsy McCall
 ##Date: 10/03/2020
-##Revised: 10/06/2020
+##Revised: 10/07/2020
 ###################################################
 library(spData)
 library(sf)
@@ -37,3 +37,26 @@ print(border_area)
 units(border_area) <- as_units("km^2")
 print(border_area)
 
+##what if we wanted to plot the US Border Zone inside the US, including coastlines?
+worldaUS <- worlda %>% filter(name_long=="United States")
+worldaUSb <- st_buffer(worldaUS, dist = -160934)
+mapUS1 <- ggplot(data=worldaUSb)+geom_sf()
+print(mapUS1)
+
+#a buffer done with negative units removes borders, so will overlay with unbuffered country map to display border
+mapUS2 <- ggplot(data=worldaUS)+geom_sf(fill="red")+geom_sf(data=worldaUSb)
+print(mapUS2)
+
+border_area2 <- st_area(worldaUS)-st_area(worldaUSb)
+print(border_area2)
+units(border_area2) <- as_units("km^2")
+print(border_area2)
+
+border_100mi <- st_difference(worldaUS,worldaUSb)
+border_area3 <- st_area(border_100mi)
+print(border_area3)
+units(border_area3) <- as_units("km^2")
+print(border_area3)
+
+USmap_border <- ggplot(data=border_100mi)+geom_sf(fill="red")
+print(USmap_border)
