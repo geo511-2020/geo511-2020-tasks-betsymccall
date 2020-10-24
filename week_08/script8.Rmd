@@ -1,0 +1,39 @@
+---
+title: "Script8"
+output:
+  html_document: default
+  github_document: default
+  powerpoint_presentation: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Case Study #8
+
+The goal of this case study is to download data from the web, do stuff with it, and then output a file in multiple formats.
+
+
+```{r load data}
+library(data.table)
+data8 <- read.csv('ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_annmean_mlo.csv',skip=55,header=TRUE)
+
+ 
+```
+
+## Our Data
+
+Our Data is Mauna Loa CO2 data (annual means) since 1959.  Let's display this in a graph.
+
+```{r pressure, echo=FALSE}
+library(ggplot2)
+ggplot(data8,aes(x=year,y=mean))+geom_line()
+
+knitr::kable(head(data8), "simple")
+##comment: use code to produce multiple doc types:
+##rmarkdown::render("path/to/file.Rmd",output_format = "all")
+```
+
+Let's see if this works!
