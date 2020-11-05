@@ -15,6 +15,7 @@ data(us_states)
 library(kableExtra)
 library(raster)
 library(ggplot2)
+library(forecats)
 
 #storms <- storm_shp(basin = "NA")
 #storm_data <- read_sf(storms$path)
@@ -57,3 +58,9 @@ plot2
 working %>% group_by(state) %>% summarize(storms=length(unique(NAME))) %>% 
   arrange(desc(storms)) %>% slice(1:5) %>% st_set_geometry(NULL) %>% knitr::kable(format="simple")
 
+working_year <- working %>% group_by(state,year) %>% summarize(storms=length(unique(NAME)))
+
+plot3 <- ggplot(working_year, aes(y=fct_reorder(state,storms),x=year,fill=storms))+geom_tile()+scale_fill_viridis_c(name="# of Storms")+ylab("State")
+x11()
+plot3
+#this put Florida on top, but left everything else alphabetized
