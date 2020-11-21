@@ -1,0 +1,137 @@
+## Lead Author: Jonathan M. Lees 
+
+![](lees_jonathan_3_05-214x300.jpg)
+
+* seismologist
+   * tomographic analysis of fault zones/tectonics 
+   * explosive volcanism
+   * geothermal imaging 
+* theoretical and computational modeling
+* Chair of Geology, at University of North Carolina
+* Last paper in Geophysical Research Letters: _Detecting Lightning Infrasound Using a High‐Altitude Balloon_(2018)
+
+## GEOmap & geomapdata
+
+### GEOmap 
+
+Set of routines for making Map Projections (forward and inverse), Topographic Maps, Perspective plots, Geological Maps, geological map symbols, geological databases, interactive plotting and selection of focus regions.
+
+[GEOmap]: https://cran.r-project.org/package=GEOmap
+
+### geomapdata 
+
+Set of data for use in package GEOmap. Includes world map, USA map, Coso map, Japan Map, ETOPO5
+
+
+[geomapdata]: https://cran.r-project.org/package=geomapdata
+
+Allows for plotting of maps and spatial data.
+
+
+## Use `plotGEOmapXY()` to draw a map of Japan
+
+```{r echo=TRUE, eval=TRUE, message=F}
+library(geomapdata)
+library(GEOmap)
+data('japmap', package='geomapdata' )
+isel1 = which( japmap$STROKES$code != "i" & japmap$STROKES$num>120 )
+PLOC=list(LON=c(137.008, 141.000), LAT=c(34.000, 36.992),
+x=c(137.008, 141.000), y=c(34.000, 36.992) )
+PROJ = setPROJ(type=2, LAT0=mean(PLOC$y) , LON0=mean(PLOC$x) )
+gxy = GLOB.XY(PLOC$LAT, PLOC$LON, PROJ)
+PLAT = pretty(PLOC$LAT)
+PLAT = c(min(PLOC$LAT),
+PLAT[PLAT>min(PLOC$LAT) & PLAT<max(PLOC$LAT)],max(PLOC$LAT))
+PLON = pretty(PLOC$LON)
+PLON = c(min(PLOC$LON),
+PLON[PLON>min(PLOC$LON) & PLON<max(PLOC$LON)], max(PLOC$LON))
+plot(gxy$x, gxy$y, asp=TRUE, ann=FALSE , axes=FALSE)
+plotGEOmapXY(japmap,SEL=isel1, LIM=c(PLOC$LON[1], PLOC$LAT[1],PLOC$LON[2],
+PLOC$LAT[2]) , PROJ=PROJ, add=TRUE )
+addLLXY(PLAT, PLON, PROJ=PROJ, LABS=TRUE, PMAT=NULL, TICS=c(.1,.1) )
+###############
+#### rotated map
+PMAT = rotdelta4(-34)
+plotGEOmapXY(japmap, PMAT=PMAT,SEL=isel1, xpd=TRUE)
+```
+
+
+
+## Options
+
+GEOmap provides plotting options for `plotGEOmapXY`:
+
+|Option          |  Description
+|--------------- |  ------------------------------------------------
+|`MAP`         |  Map Structure
+|`LIM`     |  Lat-Lon limits
+|`PROJ`      |  Projection List
+|`PMAT`       | Perspective matrix conversion
+|`add`       |  logical, TRUE=add to existing plot
+|`SEL` | Index vector of strokes to be used in plotting, default=NULL (use all that pass other tests)
+|`GRID`  | logical, TRUE=add grid lines
+|`GRIDcol` | color for grid lines
+|`MAPcol` | override color for maps
+|`MAPstyle`         |  override plotting style for maps
+|`border`         |  color, add border to polygons
+|`cenlon`         |  center longitude of plot
+|`shiftlong`         |  degrees, rotate longitude
+|`linelty`         |  Line type
+|`linewd`         |  Line width
+|`ptpch`         |  plotting character for strokes (style=1) that are plotted as points
+|`ptcex`         |  character expansion factor for style=1 strokes
+|`NUMB`         |  logical, number the strokes on the map
+and more graphical parameters
+
+
+## Plot UTM
+
+```{r utm2, echo=FALSE, eval=TRUE}
+
+library(geomapdata)
+data(USAmap)
+proj = setPROJ(type=3, LAT0=33.75, LON0= RPMG::fmod(-79., 360) ,
+LAT1=34.333333, LAT2=36.166667, LATS=NULL, LONS=NULL,
+DLAT=NULL, DLON=NULL,FE=0,FN=0)
+ALOC=list(lon=c(274.5,288), lat=c(31, 38),
+LON=c(274.5, 288), LAT=c(31, 38), shiftlon=0)
+plotGEOmapXY(USAmap, LIM=c(ALOC$LON[1], ALOC$lat[1],
+ALOC$LON[2], ALOC$lat[2]) , PROJ=proj, add=FALSE, shiftlon=0)
+plotUTM(proj, c(ALOC$LON[1], ALOC$lat[1], ALOC$LON[2], ALOC$lat[2]))
+
+```
+
+## Global View
+
+```{r global view, echo = FALSE, eval = TRUE, message=F}
+data(coastmap)
+phicen =32.20122+5
+lamcen = 335.7092+20
+MAXR = 100
+carolinablue = rgb(83/255, 157/255, 194/255)
+SEL=which( coastmap$STROKES$code=="C")
+SEL = c(SEL, which(coastmap$STROKES$nam=="GreatBritain"),
+which(coastmap$STROKES$nam=="Japan"), which(coastmap$STROKES$nam=="Ireland"))
+PER = GlobeView(phicen, lamcen, SEL=SEL, coastmap, MAXR,
+linecol=rgb(.2, .2, .2), mapcol=rgb(.8, .8, .8),
+innercol=carolinablue , circol=carolinablue , backcol="white")
+```
+
+
+## Syncline and Anticline traces with `SynAnticline()`
+
+```{R echo=FALSE}
+ff=list()
+ff$x=c(-4.850,-4.700,-3.934,-2.528, 0.603, 2.647, 3.861, 2.626)
+ff$y=c(-4.045,-2.087,-0.710, 0.172, 1.291, 2.087,-0.753,-4.131)
+G =getsplineG(ff$x, ff$y, kdiv=20)
+######## anticline
+plot(c(-5,5), c(-5,5), asp=1, type='n' )
+SynAnticline(G$x,G$y, N=5, syn=FALSE, endtol=.2)
+######## syncline
+plot(c(-5,5), c(-5,5), asp=1, type='n' )
+SynAnticline(G$x,G$y, N=5, syn=FALSE, endtol=.2)
+```
+
+
+

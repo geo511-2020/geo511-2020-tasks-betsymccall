@@ -1,1 +1,2 @@
- 
+the buffer and intersection functions were interesting
+I don't think I've ever seen data in R with units, so the units conversion function was also nice. Converting numerical values is easy math, but the units encoding is handy, and the convert function means you don't need to know the numerical conversions. 
