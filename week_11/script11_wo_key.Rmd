@@ -1,0 +1,72 @@
+---
+title: "Case Study 11"
+author: "Betsy McCall"
+date: "11/17/2020"
+output:
+  html_document: default
+  github_document: default
+---
+
+```{r setup, include=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(spData)
+library(sf)
+
+## New Packages #install
+library(mapview) # new package that makes easy leaflet maps
+library(foreach)
+library(doParallel)
+registerDoParallel(4)
+getDoParWorkers() # check registered cores
+
+# go to  http://api.census.gov/data/key_signup.html and get a key, then run the line below with your key.  Don't push your key to github!
+library(tidycensus)
+census_api_key(PUTKEYHERE)
+##remove key from final draft
+```
+
+## Case Study #11
+
+Making a map of Buffalo residents by race
+
+
+```{r processing, echo=FALSE,message=FALSE, warning=FALSE}
+racevars <- c(White = "P005003", 
+              Black = "P005004", 
+              Asian = "P005006", 
+              Hispanic = "P004003")
+
+options(tigris_use_cache = TRUE)
+erie <- get_decennial(geography = "block", variables = racevars, 
+                      state = "NY", county = "Erie County", geometry = TRUE,
+                      summary_var = "P001001", cache_table=T) 
+
+boundary <- c(xmin=-78.9,xmax=-78.85,ymin=42.888,ymax=42.92)
+buffalo_crop <- st_crop(erie,boundary)
+
+buffalo_crop$variable <- as.factor(buffalo_crop$variable)
+#with assist from Ting
+buffalo_par <- foreach(i=1:4, .combine='rbind',.packages=c("tidyverse","sf")) %dopar% {
+  race<-levels(buffalo_crop$variable)[i]
+  
+  buffalo_crop %>% filter(variable==race) %>% st_sample(size=.$value) %>% st_as_sf() %>% mutate(variable=race)
+}
+
+```
+
+## Map Plots
+
+Is it interactive?
+
+```{r map1, echo=TRUE, message=FALSE, as.is=TRUE, warning=FALSE}
+mapview(buffalo_par,zco="variable",cex=1,lwd=0)
+```
+
+My code works just fine in an R script file, but when I try to render the HTML page, I get an error:
+
+Error: path for html_dependency not found: 
+
+The Web suggests it might be related to caching.I cleared the cache. No change. I got a couple missing package errors, so I installed those, and not it's just this one. I tried saving as other file types including a github document type and got a warning message about not doing that.
+
+Not sure how to fix this.
